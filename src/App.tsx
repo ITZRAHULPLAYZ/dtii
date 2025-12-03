@@ -1,42 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
-  Plus,
-  MapPin,
-  BookOpen,
-  Music,
-  Utensils,
   X,
-  Heart,
-  Share2,
   Info,
-  Home,
-  Compass,
-  PenTool,
   ArrowRight,
-  Star,
   Globe,
-  Users,
-  Sparkles,
-  Calendar,
   CheckCircle,
-  Mail,
   ChevronRight,
-  Mountain,
   Sun,
-  CloudRain,
-  Umbrella,
   Moon,
-  ShoppingBag,
-  Languages,
   PlayCircle,
-  Menu,
   Volume2,
   VolumeX,
   Flame,
   Scroll,
   ChevronLeft,
-  Filter,
   Award,
   Shield,
 } from 'lucide-react';
@@ -130,8 +108,37 @@ const customStyles = `
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 `;
 
+// --- Interfaces ---
+
+interface ItemData {
+  id: number;
+  title: string;
+  category: string;
+  description: string;
+  image: string;
+  author: string;
+  likes: number;
+}
+
+interface MythData {
+  q: string;
+  a: string;
+  myth: boolean;
+}
+
+interface SpiceData {
+  name: string;
+  desc: string;
+  color: string;
+}
+
+interface LanguageData {
+  script: string;
+  lang: string;
+}
+
 // --- Data ---
-const INITIAL_DATA = [
+const INITIAL_DATA: ItemData[] = [
   {
     id: 1,
     title: 'Diwali',
@@ -195,9 +202,9 @@ const INITIAL_DATA = [
   },
 ];
 
-const CATEGORIES = ['All', 'Festivals', 'Architecture', 'Cuisine', 'Arts', 'Places'];
+const CATEGORIES: string[] = ['All', 'Festivals', 'Architecture', 'Cuisine', 'Arts', 'Places'];
 
-const LANGUAGES = [
+const LANGUAGES: LanguageData[] = [
   { script: 'नमस्ते', lang: 'Hindi' },
   { script: 'வணக்கம்', lang: 'Tamil' },
   { script: 'নমস্কার', lang: 'Bengali' },
@@ -210,7 +217,7 @@ const LANGUAGES = [
   { script: 'Hello', lang: 'English' },
 ];
 
-const SPICES = [
+const SPICES: SpiceData[] = [
   { name: 'Saffron', desc: 'The Red Gold', color: 'bg-red-500' },
   { name: 'Turmeric', desc: 'Golden Healer', color: 'bg-yellow-400' },
   { name: 'Cardamom', desc: 'Queen of Spices', color: 'bg-green-600' },
@@ -218,7 +225,7 @@ const SPICES = [
   { name: 'Star Anise', desc: 'Exotic Star', color: 'bg-amber-800' },
 ];
 
-const MYTHS = [
+const MYTHS: MythData[] = [
   {
     q: 'Is Hindi the national language?',
     a: 'No. India has no national language. Hindi and English are official languages.',
@@ -243,7 +250,11 @@ const MYTHS = [
 
 // --- Components ---
 
-const Preloader = ({ onFinish }) => {
+interface PreloaderProps {
+  onFinish: () => void;
+}
+
+const Preloader: React.FC<PreloaderProps> = ({ onFinish }) => {
   useEffect(() => {
     const timer = setTimeout(onFinish, 2000);
     return () => clearTimeout(timer);
@@ -264,8 +275,8 @@ const Preloader = ({ onFinish }) => {
   );
 };
 
-const VideoModal = () => {
-    const dialogRef = useRef(null);
+const VideoModal: React.FC = () => {
+    const dialogRef = useRef<HTMLDialogElement>(null);
 
     const closeModal = () => {
         if (dialogRef.current) {
@@ -300,7 +311,14 @@ const VideoModal = () => {
     );
 };
 
-const NavBar = ({ activeTab, onNavigate, darkMode, toggleTheme }) => (
+interface NavBarProps {
+  activeTab: string;
+  onNavigate: (tab: string) => void;
+  darkMode: boolean;
+  toggleTheme: () => void;
+}
+
+const NavBar: React.FC<NavBarProps> = ({ activeTab, onNavigate, darkMode, toggleTheme }) => (
   <nav
     className={`sticky top-0 z-40 transition-all duration-300 ${
       darkMode ? 'bg-black/90 border-white/5 text-white' : 'bg-white/90 border-gray-100 text-gray-900'
@@ -359,7 +377,11 @@ const NavBar = ({ activeTab, onNavigate, darkMode, toggleTheme }) => (
   </nav>
 );
 
-const MythCard = ({ item }) => {
+interface MythCardProps {
+  item: MythData;
+}
+
+const MythCard: React.FC<MythCardProps> = ({ item }) => {
   const [flipped, setFlipped] = useState(false);
   return (
     <div
@@ -397,9 +419,15 @@ const MythCard = ({ item }) => {
 
 // --- Sections ---
 
-const Hero = ({ onNavigate, darkMode }) => {
+interface HeroProps {
+  onNavigate: (tab: string) => void;
+  darkMode: boolean;
+}
+
+const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     const openModal = () => {
-        const modal = document.getElementById('video-modal');
+        // Safe cast to HTMLDialogElement
+        const modal = document.getElementById('video-modal') as HTMLDialogElement | null;
         if (modal) modal.showModal();
     }
     
@@ -448,7 +476,11 @@ const Hero = ({ onNavigate, darkMode }) => {
   </div>
 )};
 
-const EpicsSection = ({ darkMode }) => (
+interface EpicsSectionProps {
+  darkMode: boolean;
+}
+
+const EpicsSection: React.FC<EpicsSectionProps> = ({ darkMode }) => (
   <div
     className={`py-20 relative overflow-hidden text-center transition-colors duration-500 ${
       darkMode ? 'bg-gray-950 text-white' : 'bg-amber-50 text-amber-900'
@@ -506,11 +538,11 @@ const EpicsSection = ({ darkMode }) => (
 );
 
 // 🚀 Fixed infinite Spice Route scroll
-const SpiceCarousel = ({ darkMode }) => {
-  const scrollRef = useRef(null);
+const SpiceCarousel: React.FC<{ darkMode: boolean }> = ({ darkMode }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Create 3 sets for the buffer effect: [Left Buffer] [Main Set] [Right Buffer]
-  const [infiniteSpices] = useState([...SPICES, ...SPICES, ...SPICES]);
+  const [infiniteSpices] = useState<SpiceData[]>([...SPICES, ...SPICES, ...SPICES]);
 
   const itemWidth = 280; // Card width (256px) + gap (24px)
   const setWidth = SPICES.length * itemWidth;
@@ -544,7 +576,7 @@ const SpiceCarousel = ({ darkMode }) => {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [setWidth]);
 
-  const scroll = (direction) => {
+  const scroll = (direction: 'left' | 'right') => {
     const container = scrollRef.current;
     if (!container) return;
 
@@ -661,7 +693,7 @@ const SpiceCarousel = ({ darkMode }) => {
   );
 };
 
-const FactBuster = ({ darkMode }) => (
+const FactBuster: React.FC<{ darkMode: boolean }> = ({ darkMode }) => (
   <div className={`py-16 transition-colors duration-500 ${darkMode ? 'bg-black' : 'bg-white'}`}>
     <div className="max-w-7xl mx-auto px-4">
       <h2
@@ -682,14 +714,14 @@ const FactBuster = ({ darkMode }) => (
 
 // --- Main App ---
 
-const App = () => {
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('home');
-  const [darkMode, setDarkMode] = useState(false);
-  const [audioPlaying, setAudioPlaying] = useState(false);
-  const [items, setItems] = useState(INITIAL_DATA);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+const App: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<string>('home');
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
+  const [items, setItems] = useState<ItemData[]>(INITIAL_DATA);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   useEffect(() => {
     const savedData = localStorage.getItem('indiaWikiData');
@@ -697,7 +729,7 @@ const App = () => {
   }, []);
 
   const toggleTheme = () => setDarkMode(!darkMode);
-  const handleNavigate = (tab) => {
+  const handleNavigate = (tab: string) => {
     setActiveTab(tab);
     window.scrollTo(0, 0);
   };
@@ -1097,7 +1129,7 @@ const App = () => {
                           ? 'bg-black/20 border-white/10 text-white'
                           : 'bg-gray-50 border-gray-200 text-gray-900'
                       }`}
-                      rows="4"
+                      rows={4}
                       placeholder="Share the history and significance..."
                     />
                   </div>
